@@ -1,0 +1,2 @@
+"C:\VulkanSDK\1.4.321.1\Bin\glslc.exe" "D:\VulkanTutorial\VulkanTutorial\Content\VertexShader.vert" -o "D:\VulkanTutorial\VulkanTutorial\Content\VertexShader.vert.spv"
+"C:\VulkanSDK\1.4.321.1\Bin\glslc.exe" "D:\VulkanTutorial\VulkanTutorial\Content\PixelShader.frag" -o "D:\VulkanTutorial\VulkanTutorial\Content\PixelShader.frag.spv"
