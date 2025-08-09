@@ -2,14 +2,13 @@
 #define __EngineMain_h__
 
 #include "MyWindow.h"
-#include "RenderPipeline.h"
 #include "EngineDevice.h"
-#include "EngineSwapChain.h"
 #include "Mesh.h"
+#include "Renderer.h"
+
 #include <memory>
 #include <vector>
 #include "GameObject.h"
-#include <glm/gtc/constants.hpp>
 
 namespace VulkanTutorial
 {
@@ -33,22 +32,11 @@ namespace VulkanTutorial
 
 	private:
 		void LoadGameObjects();
-		void CreatePipelineLayout();
-		void CreatePipeline();
-		void CreateCommandBuffers();
-		void FreeCommandBuffers();
-		void DrawFrame();
-		void ReCreateSwapChain();
-		void RecordCommandBuffer(int ImageIndex);
-		void RenderGameObject(VkCommandBuffer CommandBuffer);
 
 		MyWindow m_MyWindow = MyWindow("My Window", WIDTH, HEIGHT);
 		EngineDevice m_EngineDevice = EngineDevice(m_MyWindow);
-		std::unique_ptr<EngineSwapChain> m_SwapChain;
-		std::unique_ptr<RenderPipeline> m_RenderPipeline;
+		Renderer m_Renderer = Renderer(m_MyWindow, m_EngineDevice);
 
-		VkPipelineLayout m_PipelineLayout;
-		std::vector<VkCommandBuffer> m_CommandBuffers;
 		std::vector<GameObject> m_GameObjects;
 	};
 }

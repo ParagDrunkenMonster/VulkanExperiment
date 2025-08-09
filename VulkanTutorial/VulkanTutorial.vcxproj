@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicRenderSystem.cpp" />
     <ClCompile Include="EngineDevice.cpp" />
     <ClCompile Include="EngineMain.cpp" />
     <ClCompile Include="EngineSwapChain.cpp" />
@@ -138,15 +139,18 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MyWindow.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RenderPipeline.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicRenderSystem.h" />
     <ClInclude Include="EngineDevice.h" />
     <ClInclude Include="EngineMain.h" />
     <ClInclude Include="EngineSwapChain.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MyWindow.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
   </ItemGroup>
   <ItemGroup>
