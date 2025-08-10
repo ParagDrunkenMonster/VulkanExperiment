@@ -86,7 +86,7 @@ namespace VulkanTutorial
         std::vector<VkFence> m_InFlightFences;
         std::vector<VkFence> m_ImagesInFlight;
         size_t m_CurrentFrame = 0;
-        };
+    };
 
 }  
 

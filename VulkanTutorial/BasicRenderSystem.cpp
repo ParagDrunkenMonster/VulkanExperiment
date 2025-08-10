@@ -10,8 +10,7 @@ namespace VulkanTutorial
 {
 	struct SimplePushConstantData
 	{
-		glm::mat2 transform = glm::mat2(1.0f);
-		glm::vec2 offset;
+		glm::mat4 transform = glm::mat2(1.0f);
 		alignas (16) glm::vec3 color;
 	};
 
@@ -59,18 +58,18 @@ namespace VulkanTutorial
 		m_RenderPipeline = std::make_unique<RenderPipeline>(m_EngineDevice, PipelineConfig, "./../../Content/VertexShader.vert.spv", "./../../Content/PixelShader.frag.spv");
 	}
 
-	void BasicRenderSystem::RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects)
+	void BasicRenderSystem::RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects, const Camera& Cam)
 	{
 		m_RenderPipeline->Bind(CommandBuffer);
+
+		auto ProjectionView = Cam.GetProjectionMatrix() * Cam.GetViewMatrix();
 
 		for (auto& Obj : GameObjects)
 		{
 			SimplePushConstantData Push;
-			//float Rotation = Obj.GetTransform2D().Rotation;
-			//Rotation = glm::mod(Rotation + 0.01f, glm::two_pi<float>());
-			Push.offset = Obj.GetTransform2D().Translation;
+
 			Push.color = Obj.GetColor();
-			Push.transform = Obj.GetTransform2D().Mat2();
+			Push.transform = ProjectionView * Obj.GetTransform().Mat4();
 
 			vkCmdPushConstants(CommandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
 				, 0, sizeof(SimplePushConstantData), &Push);

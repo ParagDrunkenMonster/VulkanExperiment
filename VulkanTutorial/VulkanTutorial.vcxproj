@@ -132,10 +132,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicRenderSystem.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="EngineDevice.cpp" />
     <ClCompile Include="EngineMain.cpp" />
     <ClCompile Include="EngineSwapChain.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="KeyboardController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MyWindow.cpp" />
@@ -144,14 +146,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicRenderSystem.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="EngineDevice.h" />
     <ClInclude Include="EngineMain.h" />
     <ClInclude Include="EngineSwapChain.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="KeyboardController.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MyWindow.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\CompileShader.bat" />

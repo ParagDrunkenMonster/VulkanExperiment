@@ -4,6 +4,7 @@
 #include "RenderPipeline.h"
 #include "EngineDevice.h"
 #include "GameObject.h"
+#include "Camera.h"
 
 #include <memory>
 #include <vector>
@@ -24,7 +25,7 @@ namespace VulkanTutorial
 		BasicRenderSystem(BasicRenderSystem&&) = delete;
 		BasicRenderSystem& operator = (BasicRenderSystem&&) = delete;
 
-		void RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects);
+		void RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects, const Camera& Cam);
 
 	private:
 

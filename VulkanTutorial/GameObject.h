@@ -4,20 +4,43 @@
 #include "Mesh.h"
 #include <memory>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace VulkanTutorial
 {
-	struct Transform2dComponent
+	struct TransformComponent
 	{
-		glm::vec2 Translation{0.0f, 0.0f};
-		glm::vec2 Scale{ 1.0f, 1.0f };
-		float Rotation = 0.0f;
-		glm::mat2 Mat2() const 
+		glm::vec3 Translation{ 0.0f, 0.0f, 0.0f};
+		glm::vec3 Scale{ 1.0f, 1.0f, 1.0f};
+		glm::vec3 Rotation{ 0.0f, 0.0f, 0.0f };
+		glm::mat4 Mat4() const 
 		{	
-			const float S = glm::sin(Rotation);
-			const float C = glm::cos(Rotation);
-			glm::mat2 RotMat{ {C, S}, {-S, C} };
-			glm::mat2 ScaleMat{ {Scale.x, 0.0f}, {0.0f, Scale.y} };
-			return RotMat * ScaleMat;
+			const float c3 = glm::cos(Rotation.z);
+			const float s3 = glm::sin(Rotation.z);
+			const float c2 = glm::cos(Rotation.x);
+			const float s2 = glm::sin(Rotation.x);
+			const float c1 = glm::cos(Rotation.y);
+			const float s1 = glm::sin(Rotation.y);
+			return glm::mat4{
+				{
+					Scale.x * (c1 * c3 + s1 * s2 * s3),
+					Scale.x * (c2 * s3),
+					Scale.x * (c1 * s2 * s3 - c3 * s1),
+					0.0f,
+				},
+				{
+					Scale.y * (c3 * s1 * s2 - c1 * s3),
+					Scale.y * (c2 * c3),
+					Scale.y * (c1 * c3 * s2 + s1 * s3),
+					0.0f,
+				},
+				{
+					Scale.z * (c2 * s1),
+					Scale.z * (-s2),
+					Scale.z * (c1 * c2),
+					0.0f,
+				},
+				{Translation.x, Translation.y, Translation.z, 1.0f} };
 		}
 	};
 
@@ -40,8 +63,8 @@ namespace VulkanTutorial
 		void SetColor(const glm::vec3& Color) { m_Color = Color; }
 		const glm::vec3& GetColor() const { return m_Color; }
 
-		void SetTransform2D(const Transform2dComponent& Transform) { m_Transform2D = Transform; }
-		const Transform2dComponent& GetTransform2D() const { return m_Transform2D; }
+		void SetTransform(const TransformComponent& Transform) { m_Transform = Transform; }
+		const TransformComponent& GetTransform() const { return m_Transform; }
 
 		static GameObject CreateGameObject();
 
@@ -53,7 +76,7 @@ namespace VulkanTutorial
 
 		std::shared_ptr<Mesh> m_Mesh;
 		glm::vec3 m_Color;
-		Transform2dComponent m_Transform2D;
+		TransformComponent m_Transform;
 	};
 }
 

@@ -8,6 +8,7 @@ namespace VulkanTutorial
 	class MyWindow
 	{
 	public:
+	
 		MyWindow(const std::string& WindowName, int Width, int Height);
 		virtual ~MyWindow();
 
@@ -21,6 +22,7 @@ namespace VulkanTutorial
 		VkExtent2D GetExtent() const { return { (uint32_t)m_Width, (uint32_t)m_Height }; }
 		bool WasWindowResized() const { return m_FrameBufferResized; }
 		void ResetWindowResizedFlag() { m_FrameBufferResized = false; }
+		GLFWwindow* GetGLFWwindow() const { return m_Window; }
 
 		void CreateWindowSurface(VkInstance VkInstance, VkSurfaceKHR* Surface);
 	private:

@@ -5,6 +5,7 @@
 #include "EngineDevice.h"
 #include "Mesh.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 #include <memory>
 #include <vector>
@@ -15,6 +16,8 @@ namespace VulkanTutorial
 	class EngineMain
 	{
 	public:
+
+		static constexpr float MAX_FRAME_TIME = 1.0f;
 
 		static constexpr int WIDTH = 800;
 		static constexpr int HEIGHT = 600;
