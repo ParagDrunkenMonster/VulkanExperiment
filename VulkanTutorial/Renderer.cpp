@@ -168,4 +168,14 @@ namespace VulkanTutorial
 
 		vkCmdEndRenderPass(CommandBuffer);
 	}
+
+	uint32_t Renderer::GetSwapChainImageCount() const
+	{
+		return m_SwapChain->ImageCount();
+	}
+
+	uint32_t Renderer::GetCurrentFrame() const
+	{
+		return m_SwapChain->GetCurrentFrame();
+	}
 }

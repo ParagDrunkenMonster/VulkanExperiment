@@ -1,17 +1,32 @@
 #include "EngineMain.h"
 #include "BasicRenderSystem.h"
 
+#include "Buffer.h"
+
 #include <stdexcept>
 #include <array>
 #include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include "KeyboardController.h"
+#include <numeric>
 
 namespace VulkanTutorial
 {
+	struct GlobalUBO
+	{
+		alignas(16) glm::mat4 projectionMatrix{ 1.0f };
+		alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{1.0f, -3.0f, -1.0f});
+	};
+
 	EngineMain::EngineMain()
 	{
+		const int ImageCount = m_Renderer.GetSwapChainImageCount();
+		m_GlobalDescriptorPool = DescriptorPool::Builder(m_EngineDevice)
+			.SetMaxSets(ImageCount)
+			.AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ImageCount)
+			.Build();
+
 		LoadGameObjects();
 	}
 
@@ -22,7 +37,37 @@ namespace VulkanTutorial
 
 	void EngineMain::Run()
 	{
-		BasicRenderSystem SimpleRenderSystem(m_EngineDevice, m_Renderer.GetSwapChainRenderPass());
+		// Find lowest common multiple
+		//auto MinOffsetAlighment = std::lcm(m_EngineDevice.PhysicalDeviceProperties().limits.minUniformBufferOffsetAlignment
+		//	, m_EngineDevice.PhysicalDeviceProperties().limits.nonCoherentAtomSize);
+
+
+		const int ImageCount = m_Renderer.GetSwapChainImageCount();
+		std::vector<std::unique_ptr<Buffer>> UboBuffers(ImageCount);
+		for (int i = 0; i < ImageCount; i++)
+		{
+			UboBuffers[i] = std::make_unique<Buffer>(m_EngineDevice, sizeof(GlobalUBO)
+				, 1
+				, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT
+				, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);// | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+				UboBuffers[i]->Map();
+		}
+
+		auto GlobalDescriptorSetLayout = DescriptorSetLayout::Builder(m_EngineDevice)
+			.AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.Build();
+
+		std::vector<VkDescriptorSet> GlobalDescriptorSets(ImageCount);
+		for (int i = 0; i < ImageCount; i++)
+		{
+			auto BufferInfo = UboBuffers[i]->DescriptorInfo();
+			DescriptorWriter(*GlobalDescriptorSetLayout, *m_GlobalDescriptorPool)
+				.WriteBuffer(0, &BufferInfo)
+				.Build(GlobalDescriptorSets[i]);
+		}
+
+		BasicRenderSystem SimpleRenderSystem(m_EngineDevice, m_Renderer.GetSwapChainRenderPass(), GlobalDescriptorSetLayout->GetDescriptorSetLayout());
 		Camera Cam;
 		Cam.SetViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
 
@@ -50,8 +95,20 @@ namespace VulkanTutorial
 
 			if (auto CommandBuffer = m_Renderer.BeginFrame())
 			{
+				const int ImageIndex = m_Renderer.GetCurrentFrame();
+
+				FrameInfo Info{ ImageIndex, FrameTime, CommandBuffer, Cam, GlobalDescriptorSets[ImageIndex]};
+
+				
+				GlobalUBO Ubo{};
+				Ubo.projectionMatrix = Cam.GetProjectionMatrix() * Cam.GetViewMatrix();
+				//GlobalUniformBuffer.WriteToIndex(&Ubo, ImageIndex);
+				//GlobalUniformBuffer.FlushIndex(ImageIndex);
+				UboBuffers[ImageIndex]->WriteToBuffer(&Ubo);
+				UboBuffers[ImageIndex]->Flush();
+
 				m_Renderer.BeginSwapChainRenderPass(CommandBuffer);
-				SimpleRenderSystem.RenderGameObject(CommandBuffer, m_GameObjects, Cam);
+				SimpleRenderSystem.RenderGameObject(Info, m_GameObjects);
 				m_Renderer.EndSwapChainRenderPass(CommandBuffer);
 				m_Renderer.EndFrame();
 			}

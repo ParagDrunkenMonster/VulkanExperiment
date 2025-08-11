@@ -10,14 +10,14 @@ namespace VulkanTutorial
 {
 	struct SimplePushConstantData
 	{
-		glm::mat4 transform = glm::mat2(1.0f);
-		alignas (16) glm::vec3 color;
+		glm::mat4 modelMatrix = glm::mat2(1.0f);
+		glm::mat4 normalMatrix = glm::mat2(1.0f);
 	};
 
-	BasicRenderSystem::BasicRenderSystem(EngineDevice& Device, VkRenderPass RenderPass)
+	BasicRenderSystem::BasicRenderSystem(EngineDevice& Device, VkRenderPass RenderPass, VkDescriptorSetLayout GlobalSetLayout)
 		: m_EngineDevice(Device)
 	{
-		CreatePipelineLayout();
+		CreatePipelineLayout(GlobalSetLayout);
 		CreatePipeline(RenderPass);
 	}
 
@@ -26,17 +26,19 @@ namespace VulkanTutorial
 		vkDestroyPipelineLayout(m_EngineDevice.Device(), m_PipelineLayout, nullptr);
 	}
 
-	void BasicRenderSystem::CreatePipelineLayout()
+	void BasicRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout GlobalSetLayout)
 	{
 		VkPushConstantRange PushConstantRange;
 		PushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		PushConstantRange.offset = 0;
 		PushConstantRange.size = sizeof(SimplePushConstantData);
 
+		std::vector<VkDescriptorSetLayout> DescriptorSetLayouts{ GlobalSetLayout };
+
 		VkPipelineLayoutCreateInfo PipelineLayoutInfo;
 		PipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		PipelineLayoutInfo.setLayoutCount = 0;
-		PipelineLayoutInfo.pSetLayouts = nullptr;
+		PipelineLayoutInfo.setLayoutCount = (uint32_t)DescriptorSetLayouts.size();
+		PipelineLayoutInfo.pSetLayouts = DescriptorSetLayouts.data();
 		PipelineLayoutInfo.pushConstantRangeCount = 1;
 		PipelineLayoutInfo.pPushConstantRanges = &PushConstantRange;
 		PipelineLayoutInfo.pNext = nullptr;
@@ -58,24 +60,32 @@ namespace VulkanTutorial
 		m_RenderPipeline = std::make_unique<RenderPipeline>(m_EngineDevice, PipelineConfig, "./../../Content/VertexShader.vert.spv", "./../../Content/PixelShader.frag.spv");
 	}
 
-	void BasicRenderSystem::RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects, const Camera& Cam)
+	void BasicRenderSystem::RenderGameObject(FrameInfo& Info, std::vector<GameObject>& GameObjects)
 	{
-		m_RenderPipeline->Bind(CommandBuffer);
+		m_RenderPipeline->Bind(Info.CommandBuffer);
 
-		auto ProjectionView = Cam.GetProjectionMatrix() * Cam.GetViewMatrix();
+		vkCmdBindDescriptorSets(Info.CommandBuffer
+			, VK_PIPELINE_BIND_POINT_GRAPHICS
+			, m_PipelineLayout
+			, 0, 1
+			, &Info.GlobalDescriptorSet
+			, 0
+			, nullptr);
 
 		for (auto& Obj : GameObjects)
 		{
 			SimplePushConstantData Push;
 
-			Push.color = Obj.GetColor();
-			Push.transform = ProjectionView * Obj.GetTransform().Mat4();
+			auto ModelMatrix = Obj.GetTransform().Mat4();
 
-			vkCmdPushConstants(CommandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
+			Push.normalMatrix = Obj.GetTransform().NormalMatrix();
+			Push.modelMatrix = ModelMatrix;
+
+			vkCmdPushConstants(Info.CommandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT
 				, 0, sizeof(SimplePushConstantData), &Push);
 
-			Obj.GetMesh()->Bind(CommandBuffer);
-			Obj.GetMesh()->Draw(CommandBuffer);
+			Obj.GetMesh()->Bind(Info.CommandBuffer);
+			Obj.GetMesh()->Draw(Info.CommandBuffer);
 		}
 	}
 }

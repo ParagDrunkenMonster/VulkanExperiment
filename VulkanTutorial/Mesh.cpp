@@ -19,24 +19,17 @@ namespace VulkanTutorial
 
 	Mesh::~Mesh()
 	{
-		vkDestroyBuffer(m_Device.Device(), m_VertexBuffer, nullptr);
-		vkFreeMemory(m_Device.Device(), m_VertexBufferMemory, nullptr);
-
-		if (m_HasIndexBuffer)
-		{
-			vkDestroyBuffer(m_Device.Device(), m_IndexBuffer, nullptr);
-			vkFreeMemory(m_Device.Device(), m_IndexBufferMemory, nullptr);
-		}
+		
 	}
 
 	void Mesh::Bind(VkCommandBuffer CommandBuffer)
 	{
-		VkBuffer Buffers[] = { m_VertexBuffer };
+		VkBuffer Buffers[] = { m_VertexBuffer->GetBuffer()};
 		VkDeviceSize Offsets[] = { 0 };
 		vkCmdBindVertexBuffers(CommandBuffer, 0, 1, Buffers, Offsets);
 
 		if (m_HasIndexBuffer)
-			vkCmdBindIndexBuffer(CommandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			vkCmdBindIndexBuffer(CommandBuffer, m_IndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 	}
 
 	void Mesh::Draw(VkCommandBuffer CommandBuffer)
@@ -85,8 +78,9 @@ namespace VulkanTutorial
 
 			m_HasIndexBuffer = true;
 		}
-	}*/
+	}
 
+	// Old implementation when buffer was created directly here.
 	void Mesh::CreateVertexBuffer(const std::vector<Vertex>& Vertices)
 	{
 		m_VertexCount = (uint32_t)Vertices.size();
@@ -149,6 +143,55 @@ namespace VulkanTutorial
 
 			m_HasIndexBuffer = true;
 		}
+	}*/
+
+void Mesh::CreateVertexBuffer(const std::vector<Vertex>& Vertices)
+	{
+		m_VertexCount = (uint32_t)Vertices.size();
+		assert(m_VertexCount >= 3 && "Vertex count should be at least 3");
+
+		const uint32_t VertexSize = sizeof(Vertices[0]);
+
+		// For vertex buffer and index buffer min offset alighment is 1
+		Buffer StagingBuffer(m_Device, VertexSize, m_VertexCount
+			, VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+			, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		StagingBuffer.Map();
+		StagingBuffer.WriteToBuffer((void*)Vertices.data());
+
+		m_VertexBuffer = std::make_unique<Buffer>(m_Device, VertexSize, m_VertexCount
+			, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+			, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		m_Device.CopyBuffer(StagingBuffer.GetBuffer(), m_VertexBuffer->GetBuffer(), StagingBuffer.GetBufferSize());
+	}
+
+	void Mesh::CreateIndexBuffer(const std::vector<uint32_t>& Indices)
+	{
+		m_IndexCount = (uint32_t)Indices.size();
+
+		if (m_IndexCount > 0)
+		{
+			const uint32_t IndexSize = sizeof(Indices[0]);
+
+			// For vertex buffer and index buffer min offset alighment is 1
+			Buffer StagingBuffer(m_Device, IndexSize, m_IndexCount
+				, VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+				, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			StagingBuffer.Map();
+			StagingBuffer.WriteToBuffer((void*)Indices.data());
+
+			m_IndexBuffer = std::make_unique<Buffer>(m_Device, IndexSize, m_IndexCount
+				, VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+				, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+
+			m_Device.CopyBuffer(StagingBuffer.GetBuffer(), m_IndexBuffer->GetBuffer(), StagingBuffer.GetBufferSize());
+
+			m_HasIndexBuffer = true;
+		}
 	}
 
 	std::unique_ptr<Mesh> Mesh::CreateModelFromFile(EngineDevice& Device, const std::string& FilePath)
@@ -173,7 +216,7 @@ namespace VulkanTutorial
 
 	std::vector<VkVertexInputAttributeDescription> Mesh::Vertex::GetAttributeDescriptions()
 	{
-		std::vector<VkVertexInputAttributeDescription> AttributeDescriptions(2);
+		std::vector<VkVertexInputAttributeDescription> AttributeDescriptions(4);
 		AttributeDescriptions[0].binding = 0;
 		AttributeDescriptions[0].location = 0;
 		AttributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
@@ -183,6 +226,16 @@ namespace VulkanTutorial
 		AttributeDescriptions[1].location = 1;
 		AttributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 		AttributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		AttributeDescriptions[2].binding = 0;
+		AttributeDescriptions[2].location = 2;
+		AttributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		AttributeDescriptions[2].offset = offsetof(Vertex, normal);
+
+		AttributeDescriptions[3].binding = 0;
+		AttributeDescriptions[3].location = 3;
+		AttributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+		AttributeDescriptions[3].offset = offsetof(Vertex, uv);
 
 		return AttributeDescriptions;
 	}

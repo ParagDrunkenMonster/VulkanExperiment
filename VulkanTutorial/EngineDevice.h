@@ -61,7 +61,7 @@ namespace VulkanTutorial
 
         void CreateImageWithInfo(const VkImageCreateInfo &imageInfo, VkMemoryPropertyFlags memoryProperties, VkImage &image, VkDeviceMemory &imageMemory);
 
-        VkPhysicalDeviceProperties m_PhysicalDeviceProperties;
+        const VkPhysicalDeviceProperties& PhysicalDeviceProperties() const { return m_PhysicalDeviceProperties; }
     
     private:
 
@@ -81,6 +81,8 @@ namespace VulkanTutorial
         void HasGflwRequiredInstanceExtensions();
         bool CheckDeviceExtensionSupport(VkPhysicalDevice device);
         SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
+
+        VkPhysicalDeviceProperties m_PhysicalDeviceProperties;
 
         VkInstance m_VKInstance;
         VkDebugUtilsMessengerEXT m_DebugMessenger;

@@ -5,6 +5,7 @@
 #include "EngineDevice.h"
 #include "GameObject.h"
 #include "Camera.h"
+#include "FrameInfo.h"
 
 #include <memory>
 #include <vector>
@@ -16,7 +17,7 @@ namespace VulkanTutorial
 	{
 	public:
 
-		BasicRenderSystem(EngineDevice& Device, VkRenderPass RenderPass);
+		BasicRenderSystem(EngineDevice& Device, VkRenderPass RenderPass, VkDescriptorSetLayout GlobalSetLayout);
 		virtual ~BasicRenderSystem();
 
 		BasicRenderSystem(const BasicRenderSystem&) = delete;
@@ -25,11 +26,11 @@ namespace VulkanTutorial
 		BasicRenderSystem(BasicRenderSystem&&) = delete;
 		BasicRenderSystem& operator = (BasicRenderSystem&&) = delete;
 
-		void RenderGameObject(VkCommandBuffer CommandBuffer, std::vector<GameObject>& GameObjects, const Camera& Cam);
+		void RenderGameObject(FrameInfo& Info, std::vector<GameObject>& GameObjects);
 
 	private:
 
-		void CreatePipelineLayout();
+		void CreatePipelineLayout(VkDescriptorSetLayout GlobalSetLayout);
 		void CreatePipeline(VkRenderPass RenderPass);
 
 		EngineDevice& m_EngineDevice;

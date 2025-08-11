@@ -48,6 +48,8 @@ namespace VulkanTutorial
                 && SwapChain.m_SwapChainImageFormat == m_SwapChainImageFormat;
         }
 
+        size_t GetCurrentFrame() const { return m_CurrentFrame; }
+
     private:
         void Init();
         void CreateSwapChain();

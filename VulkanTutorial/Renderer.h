@@ -40,6 +40,9 @@ namespace VulkanTutorial
 		void BeginSwapChainRenderPass(VkCommandBuffer CommandBuffer);
 		void EndSwapChainRenderPass(VkCommandBuffer CommandBuffer);
 
+		uint32_t GetSwapChainImageCount() const;
+		uint32_t GetCurrentFrame() const;
+
 	private:
 		void CreateCommandBuffers();
 		void FreeCommandBuffers();

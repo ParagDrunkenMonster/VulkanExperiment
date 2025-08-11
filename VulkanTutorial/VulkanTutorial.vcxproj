@@ -132,7 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicRenderSystem.cpp" />
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Descriptors.cpp" />
     <ClCompile Include="EngineDevice.cpp" />
     <ClCompile Include="EngineMain.cpp" />
     <ClCompile Include="EngineSwapChain.cpp" />
@@ -146,10 +148,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicRenderSystem.h" />
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Descriptors.h" />
     <ClInclude Include="EngineDevice.h" />
     <ClInclude Include="EngineMain.h" />
     <ClInclude Include="EngineSwapChain.h" />
+    <ClInclude Include="FrameInfo.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="KeyboardController.h" />
     <ClInclude Include="Mesh.h" />

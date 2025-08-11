@@ -10,6 +10,7 @@
 #include <memory>
 #include <vector>
 #include "GameObject.h"
+#include "Descriptors.h"
 
 namespace VulkanTutorial
 {
@@ -40,6 +41,7 @@ namespace VulkanTutorial
 		EngineDevice m_EngineDevice = EngineDevice(m_MyWindow);
 		Renderer m_Renderer = Renderer(m_MyWindow, m_EngineDevice);
 
+		std::unique_ptr<DescriptorPool> m_GlobalDescriptorPool;
 		std::vector<GameObject> m_GameObjects;
 	};
 }
